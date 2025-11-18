@@ -42,7 +42,7 @@ def delete_user(role, username):
         return "❌ Bạn không có quyền xóa."
     if username in users:
         del users[username]
-        return f"🗑️ Đã xóa tài khoản {username}"
+        return f" Đã xóa tài khoản {username}"
     return "❌ Không tìm thấy người dùng."
 
 def update_user(role, username, new_email=None, new_password=None, new_role=None):
@@ -54,6 +54,10 @@ def update_user(role, username, new_email=None, new_password=None, new_role=None
     if new_password: users[username]["password"] = new_password
     if new_role: users[username]["role"] = new_role
     return "✏️ Cập nhật thành công!"
+def add_user(role, username, password, email, user_role):
+    if role != "admin":
+        return "❌ Chỉ admin mới thêm người dùng."
+    return register_user(username, password, email, user_role)
 
 
 # ======================================================
@@ -381,44 +385,37 @@ def main_menu():
                 print(view_exam_detail(current_user, exam_num))
             except ValueError:
                 print("❌ Vui lòng nhập số hợp lệ.")
-        elif choice=="7":
-            if current_role not in ["admin","lecturer"]:
-                print("❌ Không có quyền.")
+         elif choice=="7":
+            if current_role != "admin":
+                print("❌ Chỉ admin mới quản lý người dùng.")
                 continue
             while True:
-                print("\n--- QUẢN LÝ CÂU HỎI ---")
-                print("1. Thêm câu hỏi")
-                print("2. Sửa câu hỏi")
-                print("3. Xóa câu hỏi")
-                print("4. Xem tất cả")
+                print("\n--- QUẢN LÝ NGƯỜI DÙNG ---")
+                print("1. Xem danh sách")
+                print("2. Thêm người dùng")
+                print("3. Cập nhật người dùng")
+                print("4. Xóa người dùng")
                 print("5. Quay lại")
                 c=input("Chọn: ")
-                if c=="1":
-                    text=input("Nội dung: ")
-                    raw=input("Các đáp án (A,B,C,D): ")
-                    ans=[x.strip() for x in raw.split(",")]
-                    correct=input("Đáp án đúng (A/B/C/D): ").upper()
-                    level=input("Mức độ: ")
-                    qid=qm.add_question(text,ans,correct,level)
-                    print(f"✔ Thêm câu hỏi ID {qid}")
+                if c=="1": print(list_users(current_role))
                 elif c=="2":
-                    qid=int(input("ID cần sửa: "))
-                    new_text=input("Nội dung mới: ")
-                    raw=input("Đáp án mới (A,B,C...): ")
-                    new_ans=[x.strip() for x in raw.split(",")] if raw else None
-                    new_correct=input("Đáp án đúng mới: ")
-                    lvl=input("Mức độ mới: ")
-                    print("✔ Sửa thành công") if qm.edit_question(qid,new_text or None,new_ans,new_correct or None,lvl or None) else print("❌ Không tìm thấy ID")
+                    u=input("Username: ")
+                    p=input("Password: ")
+                    e=input("Email: ")
+                    r=input("Vai trò: ")
+                    print(add_user(current_role,u,p,e,r))
                 elif c=="3":
-                    qid=int(input("ID cần xóa: "))
-                    print("✔ Đã xóa") if qm.delete_question(qid) else print("❌ Không tồn tại")
+                    u=input("Tên người dùng cần cập nhật: ")
+                    e=input("Email mới (bỏ trống nếu không đổi): ")
+                    p=input("Mật khẩu mới (bỏ trống nếu không đổi): ")
+                    r=input("Vai trò mới (bỏ trống nếu không đổi): ")
+                    print(update_user(current_role,u,e or None,p or None,r or None))
                 elif c=="4":
-                    for q in qm.questions.values():
-                        print(f"\nID {q.qid}: {q.text}")
-                        print("Đáp án:", q.answers)
-                        print("Đúng:", q.correct_answer)
-                        print("Level:", q.level)
-                elif c=="5": break
+                    u=input("Tên người dùng cần xóa: ")
+                    print(delete_user(current_role,u))
+                elif c=="5":
+                    break
+                else: print("❌ Lựa chọn sai")
         #thoat
         elif choice == "8":
             print("Thoát...")
