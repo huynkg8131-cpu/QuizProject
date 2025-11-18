@@ -195,7 +195,59 @@ def mark_exam(result):
     score = correct_count / total * 10 if total else 0
     return score, correct_count
 
+def save_exam_result(username, result, score, correct_count):
+    """Lưu kết quả bài thi vào lịch sử"""
+    if username not in exam_history:
+        exam_history[username] = []
+    
+    exam_record = {
+        "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "score": score,
+        "correct": correct_count,
+        "total": len(result),
+        "details": result
+    }
+    
+    exam_history[username].append(exam_record)
+    return " Đã lưu kết quả bài thi!"
 
+def view_exam_history(username):
+    """Xem lịch sử bài thi"""
+    if username not in exam_history or not exam_history[username]:
+        return " Bạn chưa có lịch sử bài thi nào."
+    
+    output = f"\n LỊCH SỬ BÀI THI CỦA {username.upper()}:\n"
+    output += "=" * 60 + "\n"
+    
+    for i, record in enumerate(exam_history[username], 1):
+        output += f"\n Lần {i} - {record['date']}\n"
+        output += f"    Điểm: {record['score']:.2f}/10\n"
+        output += f"   ✅ Đúng: {record['correct']}/{record['total']} câu\n"
+    
+    return output
+def view_exam_detail(username, exam_index):
+    """Xem chi tiết một bài thi cụ thể"""
+    if username not in exam_history or not exam_history[username]:
+        return " Không có lịch sử bài thi."
+    
+    if exam_index < 1 or exam_index > len(exam_history[username]):
+        return " Số thứ tự bài thi không hợp lệ."
+    
+    record = exam_history[username][exam_index - 1]
+    
+    output = f"\n CHI TIẾT BÀI THI LẦN {exam_index}\n"
+    output += f" Thời gian: {record['date']}\n"
+    output += f" Điểm số: {record['score']:.2f}/10\n"
+    output += f"✅ Đúng: {record['correct']}/{record['total']} câu\n"
+    output += "\n" + "=" * 60 + "\n"
+    
+    for qid, info in record['details'].items():
+        status = "✅" if info['user'] == info['correct'] else "❌"
+        output += f"\n{status} Câu {qid}: {info['question']}\n"
+        output += f"   Đáp án đúng: {info['correct']}\n"
+        output += f"   Bạn chọn: {info['user'] if info['user'] else '(Không trả lời)'}\n"
+    
+    return output
 # ======================================================
 #                  MENU CHÍNH
 # ======================================================
@@ -211,7 +263,10 @@ def main_menu():
         print("2. Đăng nhập")
         print("3. Quản lý câu hỏi (admin/lecturer)")
         print("4. Làm bài thi")
-        print("5. Thoát")
+        print("5. Xem lịch sử bài thi")
+        print("6. Xem chi tiết bài thi")
+        print("7. Thoát")
+
 
         choice = input("Chọn: ")
 
@@ -308,11 +363,26 @@ def main_menu():
             print(f"⭐ Điểm: {score:.2f}/10")
 
         elif choice == "5":
-            print("👋 Tạm biệt!")
-            break
+            if not current_user:
+                print("❌ Vui lòng đăng nhập trước.")
+                continue
+            print(view_exam_history(current_user))
+
+        elif choice == "6":
+            if not current_user:
+                print("❌ Vui lòng đăng nhập trước.")
+                continue
+            
+            print(view_exam_history(current_user))
+            try:
+                exam_num = int(input("\nNhập số thứ tự bài thi muốn xem chi tiết: "))
+                print(view_exam_detail(current_user, exam_num))
+            except ValueError:
+                print("❌ Vui lòng nhập số hợp lệ.")
 
         else:
             print("❌ Lựa chọn sai")
 
 if __name__ == "__main__":
     main_menu()
+
