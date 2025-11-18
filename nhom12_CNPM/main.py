@@ -265,7 +265,8 @@ def main_menu():
         print("4. Làm bài thi")
         print("5. Xem lịch sử bài thi")
         print("6. Xem chi tiết bài thi")
-        print("7. Thoát")
+        print("7. Quản lý người dùng (admin/lecturer)")
+        print ("8. Thoát")
 
 
         choice = input("Chọn: ")
@@ -368,6 +369,7 @@ def main_menu():
                 continue
             print(view_exam_history(current_user))
 
+        # XEM CHI TIẾT BÀI THI
         elif choice == "6":
             if not current_user:
                 print("❌ Vui lòng đăng nhập trước.")
@@ -379,7 +381,48 @@ def main_menu():
                 print(view_exam_detail(current_user, exam_num))
             except ValueError:
                 print("❌ Vui lòng nhập số hợp lệ.")
-
+        elif choice=="7":
+            if current_role not in ["admin","lecturer"]:
+                print("❌ Không có quyền.")
+                continue
+            while True:
+                print("\n--- QUẢN LÝ CÂU HỎI ---")
+                print("1. Thêm câu hỏi")
+                print("2. Sửa câu hỏi")
+                print("3. Xóa câu hỏi")
+                print("4. Xem tất cả")
+                print("5. Quay lại")
+                c=input("Chọn: ")
+                if c=="1":
+                    text=input("Nội dung: ")
+                    raw=input("Các đáp án (A,B,C,D): ")
+                    ans=[x.strip() for x in raw.split(",")]
+                    correct=input("Đáp án đúng (A/B/C/D): ").upper()
+                    level=input("Mức độ: ")
+                    qid=qm.add_question(text,ans,correct,level)
+                    print(f"✔ Thêm câu hỏi ID {qid}")
+                elif c=="2":
+                    qid=int(input("ID cần sửa: "))
+                    new_text=input("Nội dung mới: ")
+                    raw=input("Đáp án mới (A,B,C...): ")
+                    new_ans=[x.strip() for x in raw.split(",")] if raw else None
+                    new_correct=input("Đáp án đúng mới: ")
+                    lvl=input("Mức độ mới: ")
+                    print("✔ Sửa thành công") if qm.edit_question(qid,new_text or None,new_ans,new_correct or None,lvl or None) else print("❌ Không tìm thấy ID")
+                elif c=="3":
+                    qid=int(input("ID cần xóa: "))
+                    print("✔ Đã xóa") if qm.delete_question(qid) else print("❌ Không tồn tại")
+                elif c=="4":
+                    for q in qm.questions.values():
+                        print(f"\nID {q.qid}: {q.text}")
+                        print("Đáp án:", q.answers)
+                        print("Đúng:", q.correct_answer)
+                        print("Level:", q.level)
+                elif c=="5": break
+        #thoat
+        elif choice == "8":
+            print("Thoát...")
+            break
         else:
             print("❌ Lựa chọn sai")
 
