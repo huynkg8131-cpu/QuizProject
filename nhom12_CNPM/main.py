@@ -266,17 +266,17 @@ def main_menu():
         print("\n===== MENU CHÍNH =====")
         print("1. Đăng ký")
         print("2. Đăng nhập")
-        print("3. Quản lý câu hỏi (admin/lecturer)")
-        print("4. Làm bài thi")
-        print("5. Xem lịch sử bài thi")
-        print("6. Xem chi tiết bài thi")
-        print("7. Quản lý người dùng (admin/lecturer)")
+        print("3. Quản lý người dùng (admin/lecturer)")
+        print("4. Quản lý câu hỏi (admin/lecturer)")
+        print("5. Làm bài thi")
+        print("6. Xem lịch sử bài thi")
+        print("7. Xem chi tiết bài thi")
         print ("8. Thoát")
 
 
         choice = input("Chọn: ")
 
-        # ĐĂNG KÝ
+        # Dang ky
         if choice == "1":
             u = input("Username: ")
             p = input("Password: ")
@@ -284,7 +284,7 @@ def main_menu():
             r = input("Vai trò (student/lecturer/admin): ")
             print(register_user(u, p, e, r))
 
-        # ĐĂNG NHẬP
+        # Đang nhap
         elif choice == "2":
             u = input("Tên đăng nhập: ")
             p = input("Mật khẩu: ")
@@ -295,9 +295,39 @@ def main_menu():
                 current_user = u
             else:
                 print(res)
-
-        # QUẢN LÝ CÂU HỎI
-        elif choice == "3":
+        elif choice=="3":
+            if current_role != "admin":
+                print("❌ Chỉ admin mới quản lý người dùng.")
+                continue
+            while True:
+                print("\n--- QUẢN LÝ NGƯỜI DÙNG ---")
+                print("1. Xem danh sách")
+                print("2. Thêm người dùng")
+                print("3. Cập nhật người dùng")
+                print("4. Xóa người dùng")
+                print("5. Quay lại")
+                c=input("Chọn: ")
+                if c=="1": print(list_users(current_role))
+                elif c=="2":
+                    u=input("Username: ")
+                    p=input("Password: ")
+                    e=input("Email: ")
+                    r=input("Vai trò: ")
+                    print(add_user(current_role,u,p,e,r))
+                elif c=="3":
+                    u=input("Tên người dùng cần cập nhật: ")
+                    e=input("Email mới (bỏ trống nếu không đổi): ")
+                    p=input("Mật khẩu mới (bỏ trống nếu không đổi): ")
+                    r=input("Vai trò mới (bỏ trống nếu không đổi): ")
+                    print(update_user(current_role,u,e or None,p or None,r or None))
+                elif c=="4":
+                    u=input("Tên người dùng cần xóa: ")
+                    print(delete_user(current_role,u))
+                elif c=="5":
+                    break
+                else: print("❌ Lựa chọn sai")
+        # Quan li cau hoi
+        elif choice == "4":
             if current_role not in ["admin", "lecturer"]:
                 print("❌ Không có quyền.")
                 continue
@@ -346,7 +376,7 @@ def main_menu():
                 elif c == "5":
                     break
 
-        # LÀM BÀI THI
+        # Lam bai thi
         elif choice == "4":
             if not qm.questions:
                 print("❌ Chưa có câu hỏi.")
@@ -374,7 +404,7 @@ def main_menu():
                 continue
             print(view_exam_history(current_user))
 
-        # XEM CHI TIẾT BÀI THI
+        # Xem chi tiet bai thi
         elif choice == "6":
             if not current_user:
                 print("❌ Vui lòng đăng nhập trước.")
@@ -386,37 +416,13 @@ def main_menu():
                 print(view_exam_detail(current_user, exam_num))
             except ValueError:
                 print("❌ Vui lòng nhập số hợp lệ.")
-        elif choice=="7":
-            if current_role != "admin":
-                print("❌ Chỉ admin mới quản lý người dùng.")
+        # Xem lich su bai thi
+        elif choice == "7":
+            if not current_user:
+                print("❌ Vui lòng đăng nhập trước.")
                 continue
-            while True:
-                print("\n--- QUẢN LÝ NGƯỜI DÙNG ---")
-                print("1. Xem danh sách")
-                print("2. Thêm người dùng")
-                print("3. Cập nhật người dùng")
-                print("4. Xóa người dùng")
-                print("5. Quay lại")
-                c=input("Chọn: ")
-                if c=="1": print(list_users(current_role))
-                elif c=="2":
-                    u=input("Username: ")
-                    p=input("Password: ")
-                    e=input("Email: ")
-                    r=input("Vai trò: ")
-                    print(add_user(current_role,u,p,e,r))
-                elif c=="3":
-                    u=input("Tên người dùng cần cập nhật: ")
-                    e=input("Email mới (bỏ trống nếu không đổi): ")
-                    p=input("Mật khẩu mới (bỏ trống nếu không đổi): ")
-                    r=input("Vai trò mới (bỏ trống nếu không đổi): ")
-                    print(update_user(current_role,u,e or None,p or None,r or None))
-                elif c=="4":
-                    u=input("Tên người dùng cần xóa: ")
-                    print(delete_user(current_role,u))
-                elif c=="5":
-                    break
-                else: print("❌ Lựa chọn sai")
+            print(view_exam_history(current_user))
+
         #thoat
         elif choice == "8":
             print("Thoát...")
@@ -426,4 +432,3 @@ def main_menu():
 
 if __name__ == "__main__":
     main_menu()
-
