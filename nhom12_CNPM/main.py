@@ -2,6 +2,7 @@ import threading
 import time
 import queue
 import unittest
+from datetime import datetime
 
 # ======================================================
 #               MODULE 1 — QUẢN LÝ NGƯỜI DÙNG
@@ -385,7 +386,7 @@ def main_menu():
                 print(view_exam_detail(current_user, exam_num))
             except ValueError:
                 print("❌ Vui lòng nhập số hợp lệ.")
-         elif choice=="7":
+        elif choice=="7":
             if current_role != "admin":
                 print("❌ Chỉ admin mới quản lý người dùng.")
                 continue
