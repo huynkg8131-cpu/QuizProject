@@ -313,64 +313,6 @@ def main_menu():
 
         else:
             print("❌ Lựa chọn sai")
-"""
-import unittest
-import main
 
-class TestMain(unittest.TestCase):
-    def setUp(self):
-        # reset global state trước mỗi test
-        main.users.clear()
-
-    def test_register_and_login(self):
-        msg = main.register_user("alice", "pwd", "a@x.com", "student")
-        self.assertIn("✅", msg)
-        res = main.login_user("alice", "pwd")
-        self.assertIsInstance(res, tuple)
-        self.assertEqual(res[1], "student")
-
-    def test_list_delete_update_permissions(self):
-        # tạo admin và 1 user
-        main.register_user("admin1", "p", "admin@x", "admin")
-        main.register_user("bob", "p", "b@x", "student")
-
-        out = main.list_users("student")
-        self.assertIn("❌", out)  # student không có quyền
-
-        out = main.list_users("admin")
-        self.assertIn("bob", out)
-
-        # xóa bằng quyền admin
-        msg = main.delete_user("admin", "bob")
-        self.assertIn("🗑️", msg)
-        self.assertNotIn("bob", main.users)
-
-        # cập nhật
-        main.register_user("carol", "p", "c@x", "student")
-        res = main.update_user("admin", "carol", new_email="new@x")
-        self.assertIn("✏️", res)
-        self.assertEqual(main.users["carol"]["email"], "new@x")
-
-    def test_question_manager(self):
-        qm = main.QuestionManager()
-        qid = qm.add_question("Q1", ["A","B"], "A", "easy")
-        self.assertEqual(qid, 1)
-        self.assertTrue(qm.edit_question(1, text="Q1b"))
-        self.assertFalse(qm.edit_question(999, text="x"))
-        self.assertTrue(qm.delete_question(1))
-        self.assertFalse(qm.delete_question(1))
-
-    def test_mark_exam(self):
-        result = {
-            1: {"correct": "A", "user": "A"},
-            2: {"correct": "B", "user": "C"}
-        }
-        score, correct = main.mark_exam(result)
-        self.assertEqual(correct, 1)
-        self.assertAlmostEqual(score, 5.0)
-
-if __name__ == "__main__":
-    unittest.main()
-"""
 if __name__ == "__main__":
     main_menu()
