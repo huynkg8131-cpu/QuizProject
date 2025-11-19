@@ -13,51 +13,51 @@ exam_history={}
 
 def register_user(username, password, email, role):
     if username in users:
-        return "❌ Tên người dùng đã tồn tại."
+        return "! Tên người dùng đã tồn tại."
     users[username] = {
         "password": password,
         "email": email,
         "role": role
     }
-    return "✅ Đăng ký thành công!"
+    return "-- Đăng ký thành công!--"
 
 def login_user(username, password):
     if username not in users:
-        return "❌ Không tìm thấy người dùng."
+        return "! Không tìm thấy người dùng."
     if users[username]["password"] != password:
-        return "❌ Sai mật khẩu."
-    return f"🎉 Đăng nhập thành công! Xin chào {username}.", users[username]["role"]
+        return "! Sai mật khẩu."
+    return f" -- Đăng nhập thành công! Xin chào {username}.--", users[username]["role"]
 
 def list_users(role):
     if role not in ["admin", "lecturer"]:
-        return "❌ Bạn không có quyền xem danh sách."
+        return "! Bạn không có quyền xem danh sách."
     if not users:
-        return "📭 Chưa có người dùng nào."
-    output = "\n📋 DANH SÁCH NGƯỜI DÙNG:\n"
+        return "-- Chưa có người dùng nào --"
+    output = "\n -- DANH SÁCH NGƯỜI DÙNG: --\n"
     for u, info in users.items():
         output += f"- {u} | {info['role']} | {info['email']}\n"
     return output
 
 def delete_user(role, username):
     if role not in ["admin", "lecturer"]:
-        return "❌ Bạn không có quyền xóa."
+        return "! Bạn không có quyền xóa."
     if username in users:
         del users[username]
         return f" Đã xóa tài khoản {username}"
-    return "❌ Không tìm thấy người dùng."
+    return "! Không tìm thấy người dùng."
 
 def update_user(role, username, new_email=None, new_password=None, new_role=None):
     if role not in ["admin", "lecturer"]:
-        return "❌ Không có quyền cập nhật."
+        return "! Không có quyền cập nhật."
     if username not in users:
-        return "❌ Không tìm thấy người dùng."
+        return "! Không tìm thấy người dùng."
     if new_email: users[username]["email"] = new_email
     if new_password: users[username]["password"] = new_password
     if new_role: users[username]["role"] = new_role
-    return "✏️ Cập nhật thành công!"
+    return "-- Cập nhật thành công! --"
 def add_user(role, username, password, email, user_role):
     if role != "admin":
-        return "❌ Chỉ admin mới thêm người dùng."
+        return "! Chỉ admin mới thêm người dùng."
     return register_user(username, password, email, user_role)
 
 
@@ -182,7 +182,7 @@ class Exam:
         with self.lock:
             self.exam_over = True
 
-        print("\n📤 BÀI THI ĐÃ ĐƯỢC NỘP\n")
+        print("\n ---BÀI THI ĐÃ ĐƯỢC NỘP ---\n")
 
         return self.student_answers
 
@@ -227,7 +227,7 @@ def view_exam_history(username):
     for i, record in enumerate(exam_history[username], 1):
         output += f"\n Lần {i} - {record['date']}\n"
         output += f"    Điểm: {record['score']:.2f}/10\n"
-        output += f"   ✅ Đúng: {record['correct']}/{record['total']} câu\n"
+        output += f"    Đúng: {record['correct']}/{record['total']} câu\n"
     
     return output
 def view_exam_detail(username, exam_index):
@@ -243,16 +243,68 @@ def view_exam_detail(username, exam_index):
     output = f"\n CHI TIẾT BÀI THI LẦN {exam_index}\n"
     output += f" Thời gian: {record['date']}\n"
     output += f" Điểm số: {record['score']:.2f}/10\n"
-    output += f"✅ Đúng: {record['correct']}/{record['total']} câu\n"
+    output += f"Đúng: {record['correct']}/{record['total']} câu\n"
     output += "\n" + "=" * 60 + "\n"
     
     for qid, info in record['details'].items():
-        status = "✅" if info['user'] == info['correct'] else "❌"
+        status = "" if info['user'] == info['correct'] else "✘"
         output += f"\n{status} Câu {qid}: {info['question']}\n"
         output += f"   Đáp án đúng: {info['correct']}\n"
         output += f"   Bạn chọn: {info['user'] if info['user'] else '(Không trả lời)'}\n"
     
     return output
+
+# ======================================================
+#               MODULE 5 — BÁO CÁO HỆ THỐNG (ADMIN)
+# ======================================================
+
+def generate_report(role):
+    if role != "admin":
+        return " Chỉ admin mới xem báo cáo hệ thống."
+
+    total_users = len(users)
+    total_students = sum(1 for u in users.values() if u['role'] == 'student')
+    total_lecturers = sum(1 for u in users.values() if u['role'] == 'lecturer')
+    total_admins = sum(1 for u in users.values() if u['role'] == 'admin')
+
+    # Tổng số bài thi
+    total_exams = sum(len(history) for history in exam_history.values())
+    total_participants = len(exam_history)
+
+    avg_score = 0
+    highest_score = 0
+    lowest_score = 10
+
+    all_scores = []
+    for user, records in exam_history.items():
+        for r in records:
+            all_scores.append(r['score'])
+            if r['score'] > highest_score:
+                highest_score = r['score']
+            if r['score'] < lowest_score:
+                lowest_score = r['score']
+
+    if all_scores:
+        avg_score = sum(all_scores) / len(all_scores)
+    else:
+        lowest_score = 0
+
+    report = "\n=====  BÁO CÁO HỆ THỐNG =====\n"
+    report += f" Tổng số người dùng: {total_users}\n"
+    report += f"   • Students: {total_students}\n"
+    report += f"   • Lecturers: {total_lecturers}\n"
+    report += f"   • Admins: {total_admins}\n\n"
+
+    report += f" Tổng số bài thi đã thực hiện: {total_exams}\n"
+    report += f" Số người đã tham gia thi: {total_participants}/{total_students}\n\n"
+
+    report += " Hiệu suất làm bài:\n"
+    report += f"   • Điểm trung bình: {avg_score:.2f}/10\n"
+    report += f"   • Điểm cao nhất: {highest_score:.2f}/10\n"
+    report += f"   • Điểm thấp nhất: {lowest_score:.2f}/10\n"
+    report += "\n=====================================\n"
+    
+    return report
 # ======================================================
 #                  MENU CHÍNH
 # ======================================================
@@ -269,8 +321,8 @@ def main_menu():
         print("3. Quản lý người dùng (admin/lecturer)")
         print("4. Quản lý câu hỏi (admin/lecturer)")
         print("5. Làm bài thi")
-        print("6. Xem lịch sử bài thi")
-        print("7. Xem chi tiết bài thi")
+        print("6. Xem chi tiết bài thi")
+        print ("7. Xem báo cáo hệ thống (admin)")
         print ("8. Thoát")
 
 
@@ -295,9 +347,10 @@ def main_menu():
                 current_user = u
             else:
                 print(res)
+        # Quan li nguoi dung
         elif choice=="3":
             if current_role != "admin":
-                print("❌ Chỉ admin mới quản lý người dùng.")
+                print(" Chỉ admin mới quản lý người dùng.")
                 continue
             while True:
                 print("\n--- QUẢN LÝ NGƯỜI DÙNG ---")
@@ -325,11 +378,11 @@ def main_menu():
                     print(delete_user(current_role,u))
                 elif c=="5":
                     break
-                else: print("❌ Lựa chọn sai")
+                else: print("! Lựa chọn sai")
         # Quan li cau hoi
         elif choice == "4":
             if current_role not in ["admin", "lecturer"]:
-                print("❌ Không có quyền.")
+                print("! Không có quyền.")
                 continue
 
             while True:
@@ -360,11 +413,11 @@ def main_menu():
                     lvl = input("Mức độ mới: ")
                     print("✔ Sửa thành công") if qm.edit_question(
                         qid, new_text or None, new_ans, new_correct or None, lvl or None
-                    ) else print("❌ Không tìm thấy ID")
+                    ) else print("! Không tìm thấy ID")
 
                 elif c == "3":
                     qid = int(input("ID cần xóa: "))
-                    print("✔ Đã xóa") if qm.delete_question(qid) else print("❌ Không tồn tại")
+                    print("✔ Đã xóa") if qm.delete_question(qid) else print("! Không tồn tại")
 
                 elif c == "4":
                     for q in qm.questions.values():
@@ -377,9 +430,9 @@ def main_menu():
                     break
 
         # Lam bai thi
-        elif choice == "4":
+        elif choice == "5":
             if not qm.questions:
-                print("❌ Chưa có câu hỏi.")
+                print(" !Chưa có câu hỏi.")
                 continue
             
             exam_questions = []
@@ -398,16 +451,11 @@ def main_menu():
             print(f"🎯 Bạn đúng {correct}/{len(result)}")
             print(f"⭐ Điểm: {score:.2f}/10")
 
-        elif choice == "5":
-            if not current_user:
-                print("❌ Vui lòng đăng nhập trước.")
-                continue
-            print(view_exam_history(current_user))
 
         # Xem chi tiet bai thi
         elif choice == "6":
             if not current_user:
-                print("❌ Vui lòng đăng nhập trước.")
+                print("! Vui lòng đăng nhập trước.")
                 continue
             
             print(view_exam_history(current_user))
@@ -415,20 +463,16 @@ def main_menu():
                 exam_num = int(input("\nNhập số thứ tự bài thi muốn xem chi tiết: "))
                 print(view_exam_detail(current_user, exam_num))
             except ValueError:
-                print("❌ Vui lòng nhập số hợp lệ.")
-        # Xem lich su bai thi
+                print("! Vui lòng nhập số hợp lệ.")
+        # xem bao cao he thong
         elif choice == "7":
-            if not current_user:
-                print("❌ Vui lòng đăng nhập trước.")
-                continue
-            print(view_exam_history(current_user))
-
+            print(generate_report(current_role))
         #thoat
         elif choice == "8":
             print("Thoát...")
             break
         else:
-            print("❌ Lựa chọn sai")
+            print("! Lựa chọn sai")
 
 if __name__ == "__main__":
     main_menu()
