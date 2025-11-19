@@ -426,6 +426,7 @@ def main_menu():
 
             print(f"🎯 Bạn đúng {correct}/{len(result)}")
             print(f"⭐ Điểm: {score:.2f}/10")
+            save_exam_result(current_user, result, score, correct)
 
 
         # Xem lich su bai thi
