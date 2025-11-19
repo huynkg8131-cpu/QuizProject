@@ -465,15 +465,7 @@ def main_menu():
             # Hiển thị lịch sử
             print(view_exam_history(current_user))
             
-            # Hỏi có muốn xem chi tiết không
-            if exam_history.get(current_user):
-                see_detail = input("\nBạn có muốn xem chi tiết bài thi nào không? (y/n): ").lower()
-                if see_detail == 'y':
-                    try:
-                        exam_num = int(input("Nhập số thứ tự bài thi: "))
-                        print(view_exam_detail(current_user, exam_num))
-                    except ValueError:
-                        print("! Vui lòng nhập số hợp lệ.")
+            
 
        
 
