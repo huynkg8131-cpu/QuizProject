@@ -29,7 +29,7 @@ def login_user(username, password):
     return f" -- Đăng nhập thành công! Xin chào {username}.--", users[username]["role"]
 
 def list_users(role):
-    if role not in ["admin", "lecturer"]:
+    if role not in ["admin"]:
         return "! Bạn không có quyền xem danh sách."
     if not users:
         return "-- Chưa có người dùng nào --"
@@ -39,7 +39,7 @@ def list_users(role):
     return output
 
 def delete_user(role, username):
-    if role not in ["admin", "lecturer"]:
+    if role not in ["admin"]:
         return "! Bạn không có quyền xóa."
     if username in users:
         del users[username]
@@ -47,7 +47,7 @@ def delete_user(role, username):
     return "! Không tìm thấy người dùng."
 
 def update_user(role, username, new_email=None, new_password=None, new_role=None):
-    if role not in ["admin", "lecturer"]:
+    if role not in ["admin"]:
         return "! Không có quyền cập nhật."
     if username not in users:
         return "! Không tìm thấy người dùng."
@@ -242,7 +242,6 @@ def generate_report(role):
 
     total_users = len(users)
     total_students = sum(1 for u in users.values() if u['role'] == 'student')
-    total_lecturers = sum(1 for u in users.values() if u['role'] == 'lecturer')
     total_admins = sum(1 for u in users.values() if u['role'] == 'admin')
 
     # Tổng số bài thi
@@ -270,7 +269,6 @@ def generate_report(role):
     report = "\n=====  BÁO CÁO HỆ THỐNG =====\n"
     report += f" Tổng số người dùng: {total_users}\n"
     report += f"   • Students: {total_students}\n"
-    report += f"   • Lecturers: {total_lecturers}\n"
     report += f"   • Admins: {total_admins}\n\n"
 
     report += f" Tổng số bài thi đã thực hiện: {total_exams}\n"
@@ -296,8 +294,8 @@ def main_menu():
         print("\n===== MENU CHÍNH =====")
         print("1. Đăng ký")
         print("2. Đăng nhập")
-        print("3. Quản lý người dùng (admin/lecturer)")
-        print("4. Quản lý câu hỏi (admin/lecturer)")
+        print("3. Quản lý người dùng (admin)")
+        print("4. Quản lý câu hỏi (admin)")
         print("5. Làm bài thi")
         print("6. Xem chi tiết bài thi")
         print ("7. Xem báo cáo hệ thống (admin)")
@@ -311,7 +309,7 @@ def main_menu():
             u = input("Username: ")
             p = input("Password: ")
             e = input("Email: ")
-            r = input("Vai trò (student/lecturer/admin): ")
+            r = input("Vai trò (student/admin): ")
             print(register_user(u, p, e, r))
 
         # Đang nhap
@@ -359,7 +357,7 @@ def main_menu():
                 else: print("! Lựa chọn sai")
         # Quan li cau hoi
         elif choice == "4":
-            if current_role not in ["admin", "lecturer"]:
+            if current_role not in ["admin"]:
                 print("! Không có quyền.")
                 continue
 
