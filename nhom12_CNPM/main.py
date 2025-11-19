@@ -200,6 +200,7 @@ def mark_exam(result):
     score = correct_count / total * 10 if total else 0
     return score, correct_count
 
+
 def save_exam_result(username, result, score, correct_count):
     """Lưu kết quả bài thi vào lịch sử"""
     if username not in exam_history:
@@ -219,15 +220,39 @@ def save_exam_result(username, result, score, correct_count):
 def view_exam_history(username):
     """Xem lịch sử bài thi"""
     if username not in exam_history or not exam_history[username]:
-        return " Bạn chưa có lịch sử bài thi nào."
+        return "📭 Bạn chưa có lịch sử bài thi nào."
     
     output = f"\n LỊCH SỬ BÀI THI CỦA {username.upper()}:\n"
     output += "=" * 60 + "\n"
     
     for i, record in enumerate(exam_history[username], 1):
         output += f"\n Lần {i} - {record['date']}\n"
-        output += f"    Điểm: {record['score']:.2f}/10\n"
+        output += f"   Điểm: {record['score']:.2f}/10\n"
         output += f"    Đúng: {record['correct']}/{record['total']} câu\n"
+    
+    return output
+
+def view_exam_detail(username, exam_index):
+    """Xem chi tiết một bài thi cụ thể"""
+    if username not in exam_history or not exam_history[username]:
+        return " Không có lịch sử bài thi."
+    
+    if exam_index < 1 or exam_index > len(exam_history[username]):
+        return " Số thứ tự bài thi không hợp lệ."
+    
+    record = exam_history[username][exam_index - 1]
+    
+    output = f"\n CHI TIẾT BÀI THI LẦN {exam_index}\n"
+    output += f" Thời gian: {record['date']}\n"
+    output += f" Điểm số: {record['score']:.2f}/10\n"
+    output += f" Đúng: {record['correct']}/{record['total']} câu\n"
+    output += "\n" + "=" * 60 + "\n"
+    
+    for qid, info in record['details'].items():
+        status = "✓" if info['user'] == info['correct'] else "✘"
+        output += f"\n{status} Câu {qid}: {info['question']}\n"
+        output += f"   Đáp án đúng: {info['correct']}\n"
+        output += f"   Bạn chọn: {info['user'] if info['user'] else '(Không trả lời)'}\n"
     
     return output
 
@@ -243,6 +268,7 @@ def generate_report(role):
     total_users = len(users)
     total_students = sum(1 for u in users.values() if u['role'] == 'student')
     total_admins = sum(1 for u in users.values() if u['role'] == 'admin')
+    total_lecture = sum(1 for u in users.values() if u['role'] == 'lecturer')
 
     # Tổng số bài thi
     total_exams = sum(len(history) for history in exam_history.values())
@@ -270,6 +296,7 @@ def generate_report(role):
     report += f" Tổng số người dùng: {total_users}\n"
     report += f"   • Students: {total_students}\n"
     report += f"   • Admins: {total_admins}\n\n"
+    report += f"   • Lecturer : {total_lecture}\n\n"
 
     report += f" Tổng số bài thi đã thực hiện: {total_exams}\n"
     report += f" Số người đã tham gia thi: {total_participants}/{total_students}\n\n"
@@ -295,10 +322,10 @@ def main_menu():
         print("1. Đăng ký")
         print("2. Đăng nhập")
         print("3. Quản lý người dùng (admin)")
-        print("4. Quản lý câu hỏi (admin)")
+        print("4. Quản lý câu hỏi (lecturer)")
         print("5. Làm bài thi")
-        print("6. Xem chi tiết bài thi")
-        print ("7. Xem báo cáo hệ thống (admin)")
+        print("6. Xem lich su bài thi")
+        print ("7. Xem báo cáo hệ thống (admin/lecturer)")
         print ("8. Thoát")
 
 
@@ -309,7 +336,7 @@ def main_menu():
             u = input("Username: ")
             p = input("Password: ")
             e = input("Email: ")
-            r = input("Vai trò (student/admin): ")
+            r = input("Vai trò (student/lecturer/admin): ")
             print(register_user(u, p, e, r))
 
         # Đang nhap
@@ -357,7 +384,7 @@ def main_menu():
                 else: print("! Lựa chọn sai")
         # Quan li cau hoi
         elif choice == "4":
-            if current_role not in ["admin"]:
+            if current_role not in ["lecturer"]:
                 print("! Không có quyền.")
                 continue
 
@@ -428,13 +455,29 @@ def main_menu():
             print(f"⭐ Điểm: {score:.2f}/10")
             save_exam_result(current_user, result, score, correct)
 
-
-        # Xem lich su bai thi
+        
+        # xem lich su bai thi
         elif choice == "6":
             if not current_user:
                 print("! Vui lòng đăng nhập trước.")
                 continue
+            
+            # Hiển thị lịch sử
             print(view_exam_history(current_user))
+            
+            # Hỏi có muốn xem chi tiết không
+            if exam_history.get(current_user):
+                see_detail = input("\nBạn có muốn xem chi tiết bài thi nào không? (y/n): ").lower()
+                if see_detail == 'y':
+                    try:
+                        exam_num = int(input("Nhập số thứ tự bài thi: "))
+                        print(view_exam_detail(current_user, exam_num))
+                    except ValueError:
+                        print("! Vui lòng nhập số hợp lệ.")
+
+       
+
+
         # xem bao cao he thong
         elif choice == "7":
             print(generate_report(current_role))
@@ -447,3 +490,4 @@ def main_menu():
 
 if __name__ == "__main__":
     main_menu()
+    
