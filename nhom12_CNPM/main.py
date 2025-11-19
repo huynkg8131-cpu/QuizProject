@@ -230,29 +230,7 @@ def view_exam_history(username):
         output += f"    Đúng: {record['correct']}/{record['total']} câu\n"
     
     return output
-def view_exam_detail(username, exam_index):
-    """Xem chi tiết một bài thi cụ thể"""
-    if username not in exam_history or not exam_history[username]:
-        return " Không có lịch sử bài thi."
-    
-    if exam_index < 1 or exam_index > len(exam_history[username]):
-        return " Số thứ tự bài thi không hợp lệ."
-    
-    record = exam_history[username][exam_index - 1]
-    
-    output = f"\n CHI TIẾT BÀI THI LẦN {exam_index}\n"
-    output += f" Thời gian: {record['date']}\n"
-    output += f" Điểm số: {record['score']:.2f}/10\n"
-    output += f"Đúng: {record['correct']}/{record['total']} câu\n"
-    output += "\n" + "=" * 60 + "\n"
-    
-    for qid, info in record['details'].items():
-        status = "" if info['user'] == info['correct'] else "✘"
-        output += f"\n{status} Câu {qid}: {info['question']}\n"
-        output += f"   Đáp án đúng: {info['correct']}\n"
-        output += f"   Bạn chọn: {info['user'] if info['user'] else '(Không trả lời)'}\n"
-    
-    return output
+
 
 # ======================================================
 #               MODULE 5 — BÁO CÁO HỆ THỐNG (ADMIN)
@@ -452,18 +430,12 @@ def main_menu():
             print(f"⭐ Điểm: {score:.2f}/10")
 
 
-        # Xem chi tiet bai thi
+        # Xem lich su bai thi
         elif choice == "6":
             if not current_user:
                 print("! Vui lòng đăng nhập trước.")
                 continue
-            
             print(view_exam_history(current_user))
-            try:
-                exam_num = int(input("\nNhập số thứ tự bài thi muốn xem chi tiết: "))
-                print(view_exam_detail(current_user, exam_num))
-            except ValueError:
-                print("! Vui lòng nhập số hợp lệ.")
         # xem bao cao he thong
         elif choice == "7":
             print(generate_report(current_role))
